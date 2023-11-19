@@ -1,0 +1,139 @@
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton, QFormLayout, \
+    QLineEdit, QSpinBox, QDialog, QDialogButtonBox
+from pymongo import MongoClient
+import sys
+
+def get_database():
+    client = MongoClient("mongodb://10.20.110.98")
+    return  client['python']
+
+class WarehouseApp(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.products = []
+
+        self.setWindowTitle("Warehouse App")
+        self.setGeometry(100, 100, 400, 400)
+
+        self.main_layout = QVBoxLayout()
+
+        self.product_list_widget = QListWidget()
+        self.main_layout.addWidget(self.product_list_widget)
+
+        self.remove_product_btn = QPushButton('Remove all Products')
+        self.remove_product_btn.clicked.connect(self.remove_all_products)
+        self.main_layout.addWidget(self.remove_product_btn)
+        self.setLayout(self.main_layout)
+
+        self.add_product_btn = QPushButton("Add Product")
+        self.add_product_btn.clicked.connect(self.add_product)
+        self.main_layout.addWidget(self.add_product_btn)
+        self.setLayout(self.main_layout)
+
+    def add_product(self):
+        product_dialog = AddProductDialog()
+        if product_dialog.exec():
+            product = dict( id=product_dialog.id_spinbox.value(),
+                           name=product_dialog.name_line.text(),
+                           quantity=product_dialog.quantity_spinbox.value(),
+                           price=product_dialog.price_spinbox.value(),
+                           unit=product_dialog.units_spinbox.value(),
+                           currency=product_dialog.currency_line.text()
+                           )
+            self.products.append(product)
+            self.update_product_list()
+
+
+    def remove_all_products(self):
+        self.product_list_widget.clear()
+        return self.products.clear()
+
+    def update_product_list(self):
+        self.product_list_widget.clear()
+        for product in self.products:
+            product_str = f"ID: {product['id']}          {product['name']} - Quantity: {product['quantity']} - Price: {product['price']} - Currency: {product['currency']} - Unit: {product['unit']}"
+            self.product_list_widget.addItem(product_str)
+
+
+
+class AddProductDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Add Product")
+        self.setGeometry(200, 200, 300, 200)
+
+        self.main_layout = QVBoxLayout()
+
+        self.form_layout = QFormLayout()
+
+        self.id_spinbox = QSpinBox()
+        self.id_spinbox.setMinimum(1)
+        self.form_layout.addRow("Id:", self.id_spinbox)
+
+        self.name_line = QLineEdit()
+        self.form_layout.addRow("Name:", self.name_line)
+
+        self.quantity_spinbox = QSpinBox()
+        self.quantity_spinbox.setMinimum(0)
+        self.form_layout.addRow("Quantity:", self.quantity_spinbox)
+
+        self.price_spinbox = QSpinBox()
+        self.price_spinbox.setMinimum(0)
+        self.form_layout.addRow("Price:", self.price_spinbox)
+
+        self.units_spinbox = QSpinBox()
+        self.price_spinbox.setMinimum(0)
+        self.form_layout.addRow("Unit:", self.units_spinbox)
+
+        self.currency_line = QLineEdit()
+        self.form_layout.addRow("Currency:", self.currency_line)
+
+        self.main_layout.addLayout(self.form_layout)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        self.main_layout.addWidget(self.button_box)
+
+        self.setLayout(self.main_layout)
+
+class Remove_one_product(QDialog):
+    def __int__(self):
+        super().__init__()
+
+        self.setWindowTitle("Remove Product")
+        self.setGeometry(200, 200, 300, 200)
+
+        self.main_layout = QVBoxLayout()
+
+        self.g_layout = QFormLayout()
+
+        self.id_dell = QSpinBox()
+        self.id_dell.setMinimum(1)
+        self.g_layout.addRow("Select Id", self.id_dell)
+
+        self.main_layout.addLayout(self.g_layout)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        self.main_layout.addWidget(self.button_box)
+
+        self.setLayout(self.main_layout)
+
+        # for id_dell in self.id_spinbox:
+        #     if id_dell == self.id_spinbox
+
+
+
+def run_warehouse_app():
+    app = QApplication(sys.argv)
+    warehouse = WarehouseApp()
+    warehouse.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    run_warehouse_app()
